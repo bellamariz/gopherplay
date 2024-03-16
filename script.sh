@@ -20,10 +20,14 @@ output_dir="./output"
 
 # Gerando a playlist HLS
 ffmpeg -stream_loop -1 \
--i "$input_video" \
+-i "./assets/BigBuckBunny.mp4" \
 -c copy \
 -f hls \
--strftime 1 -hls_segment_filename "output/segment_%s.ts" \
+-hls_time 5 \
+-hls_segment_type mpegts \
+-strftime 1 \
+-hls_start_number_source epoch \
+-hls_segment_filename "output/segment_%s.ts" \
 ./output/playlist.m3u8
 # -map 1:a -c:v libx264 -x264-params keyint=150:min-keyint=150:scenecut=-1 
 
