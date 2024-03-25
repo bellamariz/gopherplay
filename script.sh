@@ -6,29 +6,18 @@ input_video="./assets/BigBuckBunny.mp4"
 # Nome da playlist HLS
 playlist_name="playlist.m3u8"
 
-# Segmentação do vídeo (duração dos segmentos em segundos)
-segment_duration=10
-
-# Nível de taxa de bits (bitrate) para o vídeo
-video_bitrate="1000k"
-
-# Nível de taxa de bits (bitrate) para o áudio
-audio_bitrate="128k"
-
-# Pasta de saída para a playlist HLS
-output_dir="./output"
-
 # Gerando a playlist HLS
 ffmpeg -stream_loop -1 \
 -i "./assets/BigBuckBunny.mp4" \
--c copy \
+-c:v libx264 -profile:v high -x264-params keyint=150:min-keyint=150:scenecut=-1 \
+-map 0:v -map 0:a \
 -f hls \
 -hls_time 5 \
 -hls_segment_type mpegts \
 -strftime 1 \
--hls_start_number_source epoch \
--hls_segment_filename "output/segment_%s.ts" \
-./output/playlist.m3u8
-# -map 1:a -c:v libx264 -x264-params keyint=150:min-keyint=150:scenecut=-1 
+-hls_list_size 10 \
+-hls_flags delete_segments+program_date_time+omit_endlist \
+-hls_segment_filename "./output/segment_%s.ts" \
+"./output/playlist.m3u8"
 
 echo "Playlist HLS gerada com sucesso!"
