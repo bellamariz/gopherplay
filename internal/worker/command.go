@@ -1,10 +1,13 @@
 package worker
 
-import "os"
+import (
+	"fmt"
+	"os"
+)
 
 // Build commands to run FFMPEG cli
 func BuildCommand() []string {
-	orderedArgs := []string{"-loglevel", "debug"}
+	orderedArgs := []string{"-loglevel", "info"}
 	orderedArgs = append(orderedArgs, buildVideoInputArguments()...)
 	orderedArgs = append(orderedArgs, buildCodecsConfig()...)
 	orderedArgs = append(orderedArgs, buildHLSArguments()...)
@@ -22,15 +25,20 @@ func buildCodecsConfig() []string {
 	args := []string{
 		"-c:v", "libx264",
 		"-profile:v", "high",
-		"-map", "0:v",
-		"-map", "0:a",
+		"-c:a", "copy",
 	}
 	return args
 }
 
 func buildHLSArguments() []string {
-	args := []string{"-f", "hls", "-strftime", "1", "-hls_time", "5",
+	segmentPattern := fmt.Sprintf("output/seg_%%s.ts")
+	args := []string{
+		"-f", "hls",
+		"-hls_time", "5",
 		"-hls_list_size", "10",
-		"-hls_segment_filename", `output/segment_%s.ts`, "output/playlist.m3u8"}
+		"-hls_flags", "delete_segments",
+		"-strftime", "1",
+		"-hls_segment_filename", segmentPattern, "output/playlist.m3u8",
+	}
 	return args
 }
