@@ -12,13 +12,13 @@ import (
 
 func NewRootCmd() *cobra.Command {
 	rootCmd := &cobra.Command{
-		Use:           "mosaic",
-		Short:         "Generate mosaic videos from many inputs",
+		Use:           "application",
+		Short:         "Run framework for application",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
 
-	rootCmd.AddCommand(RunServerOne(), RunServerTwo())
+	rootCmd.AddCommand(RunServerOne(), RunServerTwo(), RunWorker())
 
 	return rootCmd
 }
