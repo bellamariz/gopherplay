@@ -7,14 +7,14 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-func Run() {
+func Run(port string) {
 	mimetype.Configure()
 
 	e := echo.New()
 
 	e.GET("healthcheck", healthCheck)
 
-	e.Logger.Fatal(e.Start(":8080"))
+	e.Logger.Fatal(e.Start(":" + port))
 }
 
 func healthCheck(c echo.Context) error {
