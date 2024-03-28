@@ -1,9 +1,18 @@
-build-image:
-	docker build -t go-live
+build:
+	docker build -t go-live .
 
-run-image: 
-	docker run -d go-live -p 8000:8000
+run-worker:
+	docker run -it --network host go-live worker
 
-run-local:
-	VIDEO_PATH=./assets/globoplay-ad.mp4 \
-	go run main.go
+run-server1:
+	docker run -it --network host go-live server1
+
+run-server2:
+	docker run -it --network host go-live server1
+
+lint:
+	golangci-lint run -v
+	@echo "DONE ✅"
+
+clean:
+	rm -r output/*
