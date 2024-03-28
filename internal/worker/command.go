@@ -2,24 +2,26 @@ package worker
 
 import (
 	"fmt"
-	"os"
+
+	"github.com/bellamariz/go-live-without-downtime/internal/config"
 )
 
 // Build commands to run FFMPEG cli
-func BuildCommand() []string {
+func BuildCommand(cfg *config.Config) []string {
 	orderedArgs := []string{"-loglevel", "info"}
 
-	orderedArgs = append(orderedArgs, buildVideoInputArguments()...)
+	orderedArgs = append(orderedArgs, buildVideoInputArguments(cfg)...)
 	orderedArgs = append(orderedArgs, buildCodecsConfig()...)
 	orderedArgs = append(orderedArgs, buildHLSArguments()...)
 
 	return orderedArgs
 }
 
-func buildVideoInputArguments() []string {
-	args := []string{"-stream_loop", "-1", "-i"}
-
-	args = append(args, os.Getenv("VIDEO_PATH"))
+func buildVideoInputArguments(cfg *config.Config) []string {
+	args := []string{
+		"-stream_loop", "-1",
+		"-i", cfg.InputStreamPath,
+	}
 
 	return args
 }

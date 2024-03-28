@@ -8,11 +8,12 @@ import (
 
 	"github.com/rs/zerolog/log"
 
+	"github.com/bellamariz/go-live-without-downtime/internal/config"
 	"github.com/bellamariz/go-live-without-downtime/internal/worker"
 	"github.com/spf13/cobra"
 )
 
-func RunWorker() *cobra.Command {
+func RunWorker(cfg *config.Config) *cobra.Command {
 	return &cobra.Command{
 		Use:   "worker",
 		Short: "Run worker to generate mosaics",
@@ -21,7 +22,7 @@ func RunWorker() *cobra.Command {
 
 			log.Info().Msg("Running worker for ffmpeg...")
 
-			if err := worker.Execute(ctx); err != nil {
+			if err := worker.Execute(ctx, cfg); err != nil {
 				log.Error().Err(err).Msg("Failed to generate playlist")
 			}
 		},
