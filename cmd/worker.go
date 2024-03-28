@@ -5,7 +5,6 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/rs/zerolog/log"
 
@@ -20,8 +19,9 @@ func RunWorker() *cobra.Command {
 		Run: func(*cobra.Command, []string) {
 			ctx := context.Background()
 
+			log.Info().Msg("Running worker for ffmpeg...")
+
 			if err := worker.Execute(ctx); err != nil {
-				fmt.Println(err.Error())
 				log.Error().Err(err).Msg("Failed to generate playlist")
 			}
 		},
