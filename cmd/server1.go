@@ -11,7 +11,7 @@ func RunServerOne(cfg *config.Config) *cobra.Command {
 		Use:   "server1",
 		Short: "Run HTTP server",
 		Run: func(*cobra.Command, []string) {
-			server.Run(cfg.ServerOnePort)
+			server.Run(cfg.ServerOnePort, cfg.OutputStreamPath)
 		},
 	}
 }
