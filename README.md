@@ -15,7 +15,6 @@ These services can be run by calling, in different terminals, the following comm
 go run main.go worker
 go run main.go server1
 go run main.go server2
-
 ```
 
 The output live stream will be an HLS playlist, which can be played in Safari or VLC using the following URLs:
