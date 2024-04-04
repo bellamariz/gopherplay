@@ -16,7 +16,7 @@ import (
 func RunWorker(cfg *config.Config) *cobra.Command {
 	return &cobra.Command{
 		Use:   "worker",
-		Short: "Run worker to generate mosaics",
+		Short: "Run worker to generate ffmpeg live stream",
 		Run: func(*cobra.Command, []string) {
 			ctx := context.Background()
 
