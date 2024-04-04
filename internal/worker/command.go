@@ -12,7 +12,7 @@ func BuildCommand(cfg *config.Config) []string {
 
 	orderedArgs = append(orderedArgs, buildVideoInputArguments(cfg)...)
 	orderedArgs = append(orderedArgs, buildCodecsConfig()...)
-	orderedArgs = append(orderedArgs, buildHLSArguments()...)
+	orderedArgs = append(orderedArgs, buildHLSArguments(cfg)...)
 
 	return orderedArgs
 }
@@ -36,8 +36,10 @@ func buildCodecsConfig() []string {
 	return args
 }
 
-func buildHLSArguments() []string {
-	segmentPattern := fmt.Sprintf("output/seg_%%s.ts")
+func buildHLSArguments(cfg *config.Config) []string {
+	outputPath := cfg.OutputStreamPath + "/" + cfg.LiveSignalName
+	segmentPattern := fmt.Sprintf("%s/seg_%%s.ts", outputPath)
+	playlistPath := fmt.Sprintf("%s/playlist.m3u8", outputPath)
 
 	args := []string{
 		"-f", "hls",
@@ -45,7 +47,8 @@ func buildHLSArguments() []string {
 		"-hls_list_size", "10",
 		"-hls_flags", "delete_segments",
 		"-strftime", "1",
-		"-hls_segment_filename", segmentPattern, "output/playlist.m3u8",
+		"-hls_segment_filename", segmentPattern,
+		playlistPath,
 	}
 
 	return args
