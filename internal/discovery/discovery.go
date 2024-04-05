@@ -12,13 +12,13 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-type Discovery struct {
+type DiscoveryService struct {
 	path   string
 	period time.Duration
 }
 
-func NewService(cfg *config.Config) *Discovery {
-	return &Discovery{
+func NewService(cfg *config.Config) *DiscoveryService {
+	return &DiscoveryService{
 		path:   cfg.OutputStreamPath,
 		period: cfg.MaxAgePlaylist,
 	}
@@ -26,7 +26,7 @@ func NewService(cfg *config.Config) *Discovery {
 
 // FetchActiveSignals returns a list of active signals
 // An active signal is a signal that had its manifest recently updated
-func (ds *Discovery) FetchActiveSignals() []string {
+func (ds *DiscoveryService) FetchActiveSignals() []string {
 	activeSignals := make([]string, 0)
 
 	err := filepath.Walk(ds.path, func(path string, info os.FileInfo, err error) error {
@@ -57,7 +57,7 @@ func (ds *Discovery) FetchActiveSignals() []string {
 
 // FetchActiveSignals returns a list of active packagers
 // Packagers are active when commands 'server1' or 'server2' - our mock local packagers - are running
-func (ds *Discovery) FetchActivePackagers(cfg *config.Config) []string {
+func (ds *DiscoveryService) FetchActivePackagers(cfg *config.Config) []string {
 	activePackagers := make([]string, 0)
 
 	packagerPorts := []string{cfg.ServerOnePort, cfg.ServerTwoPort}

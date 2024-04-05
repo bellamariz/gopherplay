@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"time"
-
-	"github.com/rs/zerolog/log"
 )
 
 const (
@@ -24,8 +22,6 @@ func Healthcheck(endpoint string) bool {
 		if resp != nil {
 			defer resp.Body.Close()
 		}
-
-		log.Error().Err(err).Msg("Service is unreacheable")
 
 		return false
 	}
