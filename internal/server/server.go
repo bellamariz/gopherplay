@@ -13,7 +13,7 @@ func Run(port, outputStreamPath string) {
 
 	e := echo.New()
 
-	e.GET("healthcheck", healthCheck)
+	e.GET("/healthcheck", healthCheck)
 	e.GET("/*", serveStatic(outputStreamPath))
 
 	e.Logger.Fatal(e.Start(":" + port))

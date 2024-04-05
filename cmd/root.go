@@ -23,7 +23,7 @@ func NewRootCmd(cfg *config.Config) *cobra.Command {
 		SilenceErrors: true,
 	}
 
-	rootCmd.AddCommand(RunServerOne(cfg), RunServerTwo(cfg), RunWorker(cfg))
+	rootCmd.AddCommand(RunServerOne(cfg), RunServerTwo(cfg), RunWorker(cfg), RunDiscovery(cfg), RunReporter(cfg))
 
 	return rootCmd
 }
