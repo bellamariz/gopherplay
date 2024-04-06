@@ -44,8 +44,6 @@ func (c *HTTPClient) Get(endpoint string) (*http.Response, error) {
 		return nil, fmt.Errorf("get request to %s failed: %w", endpoint, err)
 	}
 
-	defer resp.Body.Close()
-
 	return resp, nil
 }
 

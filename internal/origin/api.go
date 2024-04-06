@@ -25,7 +25,7 @@ func NewServer(cfg *config.Config) *API {
 
 func (api *API) ConfigureRoutes() {
 	api.Echo.GET("/healthcheck", api.healthcheck)
-	api.Echo.GET("/live/:name", api.getSignalServer)
+	api.Echo.GET("/live/:name", api.getSignal)
 	api.Echo.GET("/signals", api.getSignals)
 }
 
@@ -43,30 +43,21 @@ func (api *API) getSignals(c echo.Context) error {
 		errorMsg := map[string]string{
 			"error": err.Error(),
 		}
-		return c.JSON(http.StatusBadRequest, errorMsg)
+		return c.JSON(http.StatusInternalServerError, errorMsg)
 	}
 
 	return c.JSON(http.StatusOK, signals)
 }
 
-func (api *API) getSignalServer(c echo.Context) error {
+func (api *API) getSignal(c echo.Context) error {
 	name := c.Param("name")
 
-	signalInfo, err := getSignalPackagers(api.ReporterEndpoint, name)
+	signalInfo, err := getSignalIngest(api.ReporterEndpoint, name)
 	if err != nil {
 		errorMsg := map[string]string{
 			"error": err.Error(),
 		}
-		return c.JSON(http.StatusBadRequest, errorMsg)
-	}
-
-	if len(signalInfo.Packagers) == 0 {
-		if err != nil {
-			errorMsg := map[string]string{
-				"error": "The signal does not have any active packager as ingest",
-			}
-			return c.JSON(http.StatusBadRequest, errorMsg)
-		}
+		return c.JSON(http.StatusInternalServerError, errorMsg)
 	}
 
 	activeSignalPath := formatPath(signalInfo.Packagers, signalInfo.Signal)

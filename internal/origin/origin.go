@@ -6,32 +6,31 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"time"
 
+	"github.com/bellamariz/go-live-without-downtime/internal/client"
 	"github.com/bellamariz/go-live-without-downtime/internal/sources"
 )
 
 func listSignals(reporterEndpoint string) ([]string, error) {
-	client := &http.Client{Timeout: 2 * time.Second}
+	httpClient := client.New()
 
 	endpoint := fmt.Sprintf("%s/ingests", reporterEndpoint)
 
-	resp, err := client.Get(endpoint)
+	resp, err := httpClient.Get(endpoint)
 	if err != nil {
 		return []string{}, err
 	}
 
-	defer resp.Body.Close()
-
 	if resp.StatusCode != http.StatusOK {
-		errMsg := errors.New("there is no active signal")
-		return []string{}, errMsg
+		return []string{}, errors.New("no active signals found by origin")
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return []string{}, err
 	}
+
+	defer resp.Body.Close()
 
 	var response []sources.Ingest
 	if err := json.Unmarshal(body, &response); err != nil {
@@ -46,27 +45,26 @@ func listSignals(reporterEndpoint string) ([]string, error) {
 	return signals, nil
 }
 
-func getSignalPackagers(reporterEndpoint, signal string) (*sources.Ingest, error) {
-	client := &http.Client{Timeout: 2 * time.Second}
+func getSignalIngest(reporterEndpoint, signal string) (*sources.Ingest, error) {
+	httpClient := client.New()
 
-	endpoint := fmt.Sprintf("%s/ingest/%s", reporterEndpoint, signal)
+	endpoint := fmt.Sprintf("%s/ingests/%s", reporterEndpoint, signal)
 
-	resp, err := client.Get(endpoint)
+	resp, err := httpClient.Get(endpoint)
 	if err != nil {
 		return &sources.Ingest{}, err
 	}
 
-	defer resp.Body.Close()
-
 	if resp.StatusCode != http.StatusOK {
-		errMsg := errors.New("there is no active signal")
-		return &sources.Ingest{}, errMsg
+		return &sources.Ingest{}, errors.New("no active signals found by origin")
 	}
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
 		return &sources.Ingest{}, err
 	}
+
+	defer resp.Body.Close()
 
 	var response sources.Ingest
 	if err := json.Unmarshal(body, &response); err != nil {
