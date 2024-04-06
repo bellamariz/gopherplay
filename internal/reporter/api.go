@@ -4,8 +4,6 @@ import (
 	"net/http"
 	"sync"
 
-	"github.com/go-playground/validator"
-
 	"github.com/bellamariz/go-live-without-downtime/internal/config"
 	"github.com/bellamariz/go-live-without-downtime/internal/sources"
 	"github.com/labstack/echo/v4"
@@ -18,24 +16,9 @@ type (
 		Port  string
 		Cache *sync.Map
 	}
-
-	CustomValidator struct {
-		validator *validator.Validate
-	}
 )
 
-func (cv *CustomValidator) Validate(i interface{}) error {
-	if err := cv.validator.Struct(i); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	return nil
-}
-
 func NewServer(cfg *config.Config) *API {
-	server := echo.New()
-	server.Validator = &CustomValidator{validator: validator.New()}
-
 	return &API{
 		Echo:  echo.New(),
 		Port:  cfg.ReporterPort,
