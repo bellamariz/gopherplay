@@ -11,10 +11,10 @@ func RunOrigin(cfg *config.Config) *cobra.Command {
 		Use:   "origin",
 		Short: "Run origin server that awnswer the active signal server",
 		Run: func(*cobra.Command, []string) {
-			originServer := origin.NewServer(cfg)
+			originAPI := origin.NewServer(cfg)
 
-			originServer.ConfigureRoutes()
-			originServer.Start()
+			originAPI.ConfigureRoutes()
+			originAPI.Start()
 		},
 	}
 }
