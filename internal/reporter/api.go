@@ -7,7 +7,6 @@ import (
 	"github.com/bellamariz/go-live-without-downtime/internal/config"
 	"github.com/bellamariz/go-live-without-downtime/internal/sources"
 	"github.com/labstack/echo/v4"
-	"github.com/rs/zerolog/log"
 )
 
 type (
@@ -29,9 +28,8 @@ func NewServer(cfg *config.Config) *API {
 func (api *API) ConfigureRoutes() {
 	api.Echo.GET("/healthcheck", api.healthcheck)
 	api.Echo.GET("/ingests", api.getIngests)
-	api.Echo.GET("/ingest/:name", api.getSignalIngest)
+	api.Echo.GET("/ingests/:name", api.getSignalIngest)
 	api.Echo.POST("/ingests", api.updateIngests)
-	api.Echo.DELETE("/ingests", api.deleteCache)
 }
 
 func (api *API) Start() error {
@@ -46,15 +44,18 @@ func (api *API) getIngests(c echo.Context) error {
 	ingests := []sources.Ingest{}
 
 	api.Cache.Range(func(key, value any) bool {
-		ingests = append(ingests, value.(sources.Ingest))
+		ingest := value.(sources.Ingest)
+
+		if ingest.IsActive() {
+			ingests = append(ingests, value.(sources.Ingest))
+		}
+
 		return true
 	})
 
 	if len(ingests) <= 0 {
-		log.Error().Msg("Error while getting ingest info")
-
 		errMsg := map[string]string{
-			"error": "No ingest info available in cache",
+			"error": "No active ingest info available",
 		}
 
 		return c.JSON(http.StatusInternalServerError, errMsg)
@@ -74,17 +75,7 @@ func (api *API) updateIngests(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, errorMsg)
 	}
 
-	log.Info().Msgf("Updating '%s' ingest source", ingestSource.Signal)
 	api.Cache.Store(ingestSource.Signal, ingestSource)
-
-	return c.NoContent(http.StatusOK)
-}
-
-func (api *API) deleteCache(c echo.Context) error {
-	api.Cache.Range(func(key, value any) bool {
-		api.Cache.Delete(key)
-		return true
-	})
 
 	return c.NoContent(http.StatusOK)
 }

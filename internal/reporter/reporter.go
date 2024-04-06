@@ -2,7 +2,7 @@ package reporter
 
 import (
 	"encoding/json"
-	"net/http"
+	"fmt"
 	"time"
 
 	"github.com/bellamariz/go-live-without-downtime/internal/client"
@@ -13,12 +13,14 @@ import (
 )
 
 type ReporterService struct {
+	Client          *client.HTTPClient
 	PackagerService *discovery.DiscoveryService
 	Endpoint        string
 }
 
 func NewService(cfg *config.Config, ds *discovery.DiscoveryService) *ReporterService {
 	return &ReporterService{
+		Client:          client.New(),
 		PackagerService: ds,
 		Endpoint:        cfg.LocalHost + ":" + cfg.ReporterPort,
 	}
@@ -34,20 +36,7 @@ func (rs *ReporterService) Start(cfg *config.Config) {
 
 func (rs *ReporterService) SetIngest(cfg *config.Config) {
 	activePackagers := rs.PackagerService.FetchActivePackagers(cfg)
-
-	if len(activePackagers) <= 0 {
-		log.Warn().Msg("There are no active packagers")
-		rs.PackagerService.ResetSignals(cfg)
-		return
-	}
-
 	activeSignals := rs.PackagerService.FetchActiveSignals()
-
-	if len(activeSignals) <= 0 {
-		log.Warn().Msg("There are no active signals")
-		rs.PackagerService.ResetSignals(cfg)
-		return
-	}
 
 	for _, signal := range activeSignals {
 		rs.setSignalIngest(signal, activePackagers)
@@ -64,16 +53,11 @@ func (rs *ReporterService) setSignalIngest(signal string, packagers []string) {
 		return
 	}
 
-	resp, err := client.Post(rs.Endpoint, "ingests", "application/json", payload)
+	endpoint := fmt.Sprintf("%s/ingests", rs.Endpoint)
+
+	err = rs.Client.Post(endpoint, "application/json", payload)
 	if err != nil {
 		log.Error().Err(err).Msgf("Failed to set ingest for '%s' signal", signal)
-		return
-	}
-
-	defer resp.Body.Close()
-
-	if resp.StatusCode != http.StatusOK {
-		log.Error().Err(err).Msgf("Failed to set ingest for '%s' signal: got '%s'", signal, resp.Status)
 		return
 	}
 
