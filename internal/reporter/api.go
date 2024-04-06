@@ -45,7 +45,9 @@ func NewServer(cfg *config.Config) *API {
 func (api *API) ConfigureRoutes() {
 	api.Echo.GET("/healthcheck", api.healthcheck)
 	api.Echo.GET("/ingests", api.getIngests)
+	api.Echo.GET("/ingest/:name", api.getSignalIngest)
 	api.Echo.POST("/ingests", api.updateIngests)
+	api.Echo.DELETE("/ingests", api.deleteCache)
 }
 
 func (api *API) Start() error {
@@ -88,7 +90,32 @@ func (api *API) updateIngests(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, errorMsg)
 	}
 
+	log.Info().Msgf("Updating '%s' ingest source", ingestSource.Signal)
 	api.Cache.Store(ingestSource.Signal, ingestSource)
 
 	return c.NoContent(http.StatusOK)
+}
+
+func (api *API) deleteCache(c echo.Context) error {
+	api.Cache.Range(func(key, value any) bool {
+		api.Cache.Delete(key)
+		return true
+	})
+
+	return c.NoContent(http.StatusOK)
+}
+
+func (api *API) getSignalIngest(c echo.Context) error {
+	signalName := c.Param("name")
+
+	ingest, found := api.Cache.Load(signalName)
+	if !found {
+		errorMsg := map[string]string{
+			"error": "Active ingests servers not found",
+		}
+
+		return c.JSON(http.StatusNotFound, errorMsg)
+	}
+
+	return c.JSON(http.StatusOK, ingest)
 }

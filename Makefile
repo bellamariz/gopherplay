@@ -16,6 +16,9 @@ run-discovery:
 run-reporter:
 	docker run -ti --rm --network host -v OutputVolume:/app go-live reporter
 
+run-origin:
+	docker run -ti --rm --network host -v OutputVolume:/app go-live origin
+
 run-local-worker:
 	go run main.go worker
 
@@ -30,6 +33,9 @@ run-local-discovery:
 
 run-local-reporter:
 	go run main.go reporter
+
+run-local-origin:
+	go run main.go origin
 
 lint:
 	golangci-lint run -v

@@ -13,6 +13,7 @@ type Config struct {
 	LocalHost             string        `envconfig:"LOCAL_HOST"`
 	MaxAgePlaylist        time.Duration `envconfig:"MAX_AGE_PLAYLIST"`
 	OutputStreamPath      string        `envconfig:"OUTPUT_STREAM_PATH"`
+	OriginPort            string        `envconfig:"ORIGIN_PORT"`
 	ReporterPort          string        `envconfig:"REPORTER_PORT"`
 	ServerOnePort         string        `envconfig:"SERVER_ONE_PORT"`
 	ServerTwoPort         string        `envconfig:"SERVER_TWO_PORT"`
