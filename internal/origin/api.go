@@ -2,7 +2,6 @@ package origin
 
 import (
 	"net/http"
-	"sync"
 
 	"github.com/bellamariz/go-live-without-downtime/internal/config"
 	"github.com/labstack/echo/v4"
@@ -10,24 +9,17 @@ import (
 
 type (
 	API struct {
-		Echo           *echo.Echo
-		Port           string
-		ReportEndPoint string
-		Cache          *sync.Map
-	}
-
-	ServerParams struct {
-		Config           *config.Config
+		Echo             *echo.Echo
+		Port             string
 		ReporterEndpoint string
 	}
 )
 
-func NewServer(params ServerParams) *API {
+func NewServer(cfg *config.Config) *API {
 	return &API{
-		Echo:           echo.New(),
-		Port:           params.Config.OriginPort,
-		ReportEndPoint: params.ReporterEndpoint,
-		Cache:          &sync.Map{},
+		Echo:             echo.New(),
+		Port:             cfg.OriginPort,
+		ReporterEndpoint: cfg.LocalHost + ":" + cfg.ReporterPort,
 	}
 }
 
@@ -46,7 +38,7 @@ func (api *API) healthcheck(c echo.Context) error {
 }
 
 func (api *API) getSignals(c echo.Context) error {
-	signals, err := listSignals(api.ReportEndPoint)
+	signals, err := listSignals(api.ReporterEndpoint)
 	if err != nil {
 		errorMsg := map[string]string{
 			"error": err.Error(),
@@ -60,7 +52,7 @@ func (api *API) getSignals(c echo.Context) error {
 func (api *API) getSignalServer(c echo.Context) error {
 	name := c.Param("name")
 
-	signalInfo, err := getSignalPackagers(api.ReportEndPoint, name)
+	signalInfo, err := getSignalPackagers(api.ReporterEndpoint, name)
 	if err != nil {
 		errorMsg := map[string]string{
 			"error": err.Error(),
