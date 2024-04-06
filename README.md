@@ -68,7 +68,47 @@ make run-local-reporter
 
 ## Serving the Origin
 
-TBD
+The origin server connect all the logics detailed before to client, also knowed as player or some playback/delivery API. The client ask for the signal URL and origin checks with reporter server which URL is being used to play the video.
+
+**The client flow consists:**
+- See the avaliable signals
+- Choose one and ask for their url
+
+### Requirements to run
+- Discovery Server
+  - Server 1
+  - Server 2
+    - Worker
+- Reporter server
+
+```sh
+make run-local-origin
+```
+
+Signals avaliable
+```sh
+curl -v http://localhost:8001/signals
+```
+
+```json
+[
+  "live01"
+]
+```
+
+Ask for signal URL
+```sh
+curl -v http://localhost:8001/live/live01
+```
+
+```json
+{
+  "signal": "live01",
+  "server": "http://localhost:8080/live01/playlist.m3u8"
+}
+```
+
+Open the Safari Browser or [VLC Player](https://www.videolan.org/vlc/) and plays the signal url `http://localhost:8080/live01/playlist.m3u8`
 
 ## Zero Downtime Strategy
 
