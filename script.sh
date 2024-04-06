@@ -1,10 +1,10 @@
 #!/bin/sh
 mkdir -p output
 
-# Gerando a playlist HLS
+# Generating HLS playlist
 ffmpeg \
   -loglevel info \
-  -stream_loop -1 -i "assets/globoplay-ad.mp4" \
+  -stream_loop -1 -i "assets/stream.mp4" \
   -c:v libx264 -profile:v high \
   -c:a copy \
   -f hls \
@@ -14,4 +14,4 @@ ffmpeg \
   -strftime 1 -hls_segment_filename "output/seg_%s.ts" \
   "output/playlist.m3u8"
 
-echo "Playlist HLS gerada com sucesso!"
+echo "Playlist generated successfully!"
