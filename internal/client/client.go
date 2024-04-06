@@ -11,12 +11,20 @@ const (
 	httpTimeout = 2 * time.Second
 )
 
-func Healthcheck(endpoint string) bool {
-	client := &http.Client{Timeout: httpTimeout}
+type HTTPClient struct {
+	Client *http.Client
+}
 
+func New() *HTTPClient {
+	return &HTTPClient{
+		Client: &http.Client{Timeout: httpTimeout},
+	}
+}
+
+func (c *HTTPClient) Healthcheck(endpoint string) bool {
 	url := fmt.Sprintf("%s/healthcheck", endpoint)
 
-	resp, err := client.Get(url)
+	resp, err := c.Get(url)
 
 	if err != nil {
 		if resp != nil {
@@ -29,13 +37,11 @@ func Healthcheck(endpoint string) bool {
 	return true
 }
 
-func Get(url string) (*http.Response, error) {
-	client := &http.Client{Timeout: httpTimeout}
-
-	resp, err := client.Get(url)
+func (c *HTTPClient) Get(endpoint string) (*http.Response, error) {
+	resp, err := c.Client.Get(endpoint)
 
 	if err != nil {
-		return nil, fmt.Errorf("request to %s failed: %w", url, err)
+		return nil, fmt.Errorf("get request to %s failed: %w", endpoint, err)
 	}
 
 	defer resp.Body.Close()
@@ -43,17 +49,37 @@ func Get(url string) (*http.Response, error) {
 	return resp, nil
 }
 
-func Post(endpoint, path, contentType string, payload []byte) (*http.Response, error) {
-	httpClient := &http.Client{Timeout: httpTimeout}
-
-	url := fmt.Sprintf("%s/%s", endpoint, path)
-
-	resp, err := httpClient.Post(url, contentType, bytes.NewBuffer(payload)) /* #nosec G107 */
+func (c *HTTPClient) Post(endpoint, contentType string, payload []byte) error {
+	resp, err := c.Client.Post(endpoint, contentType, bytes.NewBuffer(payload)) /* #nosec G107 */
 	if err != nil {
-		return nil, fmt.Errorf("request to %s failed: %w", url, err)
+		return fmt.Errorf("post request to %s failed: %w", endpoint, err)
 	}
 
 	defer resp.Body.Close()
 
-	return resp, nil
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("post request returned status %d", resp.StatusCode)
+	}
+
+	return nil
+}
+
+func (c *HTTPClient) Delete(endpoint string) error {
+	req, err := http.NewRequest(http.MethodDelete, endpoint, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		return fmt.Errorf("delete request to %s failed: %w", endpoint, err)
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("delete request returned status %d", resp.StatusCode)
+	}
+
+	return nil
 }
