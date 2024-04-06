@@ -75,8 +75,7 @@ func (ds *DiscoveryService) FetchActivePackagers(cfg *config.Config) []string {
 	return activePackagers
 }
 
-// ResetSignals reset the signals cache in the reporter server
-// to prevent invalid values
+// ResetSignals resets the signals cache in the reporter server to prevent invalid values
 func (ds *DiscoveryService) ResetSignals(cfg *config.Config) error {
 	client := &http.Client{Timeout: 2 * time.Second}
 
