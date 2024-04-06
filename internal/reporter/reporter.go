@@ -42,6 +42,7 @@ func (rs *ReporterService) SetIngest(cfg *config.Config) {
 
 	if len(activePackagers) <= 0 {
 		log.Warn().Msg("There are no active packagers")
+		rs.PackagerService.ResetSignals(cfg)
 		return
 	}
 
@@ -49,6 +50,7 @@ func (rs *ReporterService) SetIngest(cfg *config.Config) {
 
 	if len(activeSignals) <= 0 {
 		log.Warn().Msg("There are no active signals")
+		rs.PackagerService.ResetSignals(cfg)
 		return
 	}
 

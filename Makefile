@@ -31,6 +31,9 @@ run-local-discovery:
 run-local-reporter:
 	go run main.go reporter
 
+run-local-origin:
+	go run main.go origin
+
 lint:
 	golangci-lint run -v
 	@echo "DONE ✅"

@@ -1,7 +1,9 @@
 package discovery
 
 import (
+	"errors"
 	"fmt"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -71,6 +73,29 @@ func (ds *DiscoveryService) FetchActivePackagers(cfg *config.Config) []string {
 	}
 
 	return activePackagers
+}
+
+// ResetSignals reset the signals cache in the reporter server
+// to prevent invalid values
+func (ds *DiscoveryService) ResetSignals(cfg *config.Config) error {
+	client := &http.Client{Timeout: 2 * time.Second}
+
+	endpoint := fmt.Sprintf("%s:%s/ingests", cfg.LocalHost, cfg.ReporterPort)
+	req, err := http.NewRequest(http.MethodDelete, endpoint, nil)
+	if err != nil {
+		return err
+	}
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		log.Err(err).Msg("Error reset cache in reporter server")
+		return errors.New("error reset cache in reporter server")
+	}
+	return nil
 }
 
 func isRecentlyUpdated(fi os.FileInfo, period time.Duration) bool {
