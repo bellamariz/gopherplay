@@ -25,17 +25,6 @@ type (
 	CustomValidator struct {
 		validator *validator.Validate
 	}
-
-	// ReporterResponse struct {
-	// 	Signal       string   `json:"signal"`
-	// 	Packagers    []string `json:"packagers"`
-	// 	LastReported string   `json:"last_reported"`
-	// }
-
-	// SignalResponse struct {
-	// 	Signal string `json:"signal"`
-	// 	Server string `json:"server"`
-	// }
 )
 
 func (cv *CustomValidator) Validate(i interface{}) error {
@@ -60,7 +49,8 @@ func NewServer(params ServerParams) *API {
 
 func (api *API) ConfigureRoutes() {
 	api.Echo.GET("/healthcheck", api.healthcheck)
-	api.Echo.GET("/signal/:name", api.getSignalServer)
+	api.Echo.GET("/live/:name", api.getSignalServer)
+	api.Echo.GET("/signals", api.getSignals)
 }
 
 func (api *API) Start() error {
@@ -69,6 +59,18 @@ func (api *API) Start() error {
 
 func (api *API) healthcheck(c echo.Context) error {
 	return c.String(http.StatusOK, "WORKING")
+}
+
+func (api *API) getSignals(c echo.Context) error {
+	signals, err := listSignals(api.ReportEndPoint)
+	if err != nil {
+		errorMsg := map[string]string{
+			"error": err.Error(),
+		}
+		return c.JSON(http.StatusBadRequest, errorMsg)
+	}
+
+	return c.JSON(http.StatusOK, signals)
 }
 
 func (api *API) getSignalServer(c echo.Context) error {

@@ -22,6 +22,41 @@ type (
 	}
 )
 
+func listSignals(reporterEndpoint string) ([]string, error) {
+	client := &http.Client{Timeout: 2 * time.Second}
+
+	endpoint := fmt.Sprintf("%s/ingests", reporterEndpoint)
+
+	resp, err := client.Get(endpoint)
+	if err != nil {
+		return []string{}, err
+	}
+
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		errMsg := errors.New("there is no active signal")
+		return []string{}, errMsg
+	}
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return []string{}, err
+	}
+
+	var response []ReporterResponse
+	if err := json.Unmarshal(body, &response); err != nil {
+		return []string{}, err
+	}
+
+	signals := []string{}
+	for _, v := range response {
+		signals = append(signals, v.Signal)
+	}
+
+	return signals, nil
+}
+
 func getSignalPackagers(reporterEndpoint, signal string) (*ReporterResponse, error) {
 	client := &http.Client{Timeout: 2 * time.Second}
 
@@ -35,7 +70,7 @@ func getSignalPackagers(reporterEndpoint, signal string) (*ReporterResponse, err
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		errMsg := errors.New("there is no signal active")
+		errMsg := errors.New("there is no active signal")
 		return &ReporterResponse{}, errMsg
 	}
 
