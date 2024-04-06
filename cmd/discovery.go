@@ -17,7 +17,9 @@ func RunDiscovery(cfg *config.Config) *cobra.Command {
 			discoveryService := discovery.NewService(cfg)
 			reporterService := reporter.NewService(cfg, discoveryService)
 
-			if !client.Healthcheck(reporterService.Endpoint) {
+			httpClient := client.New()
+
+			if !httpClient.Healthcheck(reporterService.Endpoint) {
 				log.Error().Msg("Reporter service is not running")
 				return
 			}
