@@ -8,14 +8,9 @@ import (
 	"github.com/bellamariz/go-live-without-downtime/internal/client"
 	"github.com/bellamariz/go-live-without-downtime/internal/config"
 	"github.com/bellamariz/go-live-without-downtime/internal/discovery"
+	"github.com/bellamariz/go-live-without-downtime/internal/sources"
 	"github.com/rs/zerolog/log"
 )
-
-type Ingest struct {
-	Signal       string   `json:"signal"`
-	Packagers    []string `json:"packagers"`
-	LastReported string   `json:"last_reported"`
-}
 
 type ReporterService struct {
 	PackagerService *discovery.DiscoveryService
@@ -61,7 +56,7 @@ func (rs *ReporterService) SetIngest(cfg *config.Config) {
 
 func (rs *ReporterService) setSignalIngest(signal string, packagers []string) {
 	now := time.Now().Format(time.RFC1123)
-	ingestSource := Ingest{Packagers: packagers, Signal: signal, LastReported: now}
+	ingestSource := sources.Ingest{Packagers: packagers, Signal: signal, LastReported: now}
 
 	payload, err := json.Marshal(ingestSource)
 	if err != nil {

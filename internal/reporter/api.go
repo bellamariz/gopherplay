@@ -7,6 +7,7 @@ import (
 	"github.com/go-playground/validator"
 
 	"github.com/bellamariz/go-live-without-downtime/internal/config"
+	"github.com/bellamariz/go-live-without-downtime/internal/sources"
 	"github.com/labstack/echo/v4"
 	"github.com/rs/zerolog/log"
 )
@@ -59,10 +60,10 @@ func (api *API) healthcheck(c echo.Context) error {
 }
 
 func (api *API) getIngests(c echo.Context) error {
-	ingests := []Ingest{}
+	ingests := []sources.Ingest{}
 
 	api.Cache.Range(func(key, value any) bool {
-		ingests = append(ingests, value.(Ingest))
+		ingests = append(ingests, value.(sources.Ingest))
 		return true
 	})
 
@@ -80,7 +81,7 @@ func (api *API) getIngests(c echo.Context) error {
 }
 
 func (api *API) updateIngests(c echo.Context) error {
-	var ingestSource Ingest
+	var ingestSource sources.Ingest
 
 	if err := c.Bind(&ingestSource); err != nil {
 		errorMsg := map[string]string{
