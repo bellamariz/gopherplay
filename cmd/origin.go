@@ -13,7 +13,6 @@ func RunOrigin(cfg *config.Config) *cobra.Command {
 		Use:   "origin",
 		Short: "Run origin server that awnswer the active signal server",
 		Run: func(*cobra.Command, []string) {
-			fmt.Println("Origin server =)")
 			reporterUrl := fmt.Sprintf("%s:%s", cfg.LocalHost, cfg.ReporterPort)
 			serverParams := origin.ServerParams{
 				Config:           cfg,
