@@ -44,7 +44,7 @@ Thus, we now have two other containers, which also run separately:
 
 - **reporter** - Implements an API that receives the ingest information from the **discovery** service and stores it in a local cache. Then, it uses the information from the cache to expose a JSON with the active ingest information on the route `http://localhost:2000/ingests`:
 
-```sh
+```json
 [
   {
     "signal": "live01",
@@ -68,24 +68,18 @@ make run-local-reporter
 
 ## Serving the Origin
 
-The origin server connect all the logics detailed before to client, also knowed as player or some playback/delivery API. The client ask for the signal URL and origin checks with reporter server which URL is being used to play the video.
+The **origin** service connects all the services detailed before to the final client, such as a player or a playback/delivery API. The client sends a request for a signal and the **origin** service checks with the **reporter** service which _packager_ is being used to publish it, and then, returns the requested content to the client. 
 
-**The client flow consists:**
-- See the avaliable signals
-- Choose one and ask for their url
-
-### Requirements to run
-- Discovery Server
-  - Server 1
-  - Server 2
-    - Worker
-- Reporter server
+To run this service, use the Makefile command below:
 
 ```sh
 make run-local-origin
 ```
 
-Signals avaliable
+The **origin** runs on the `http://localhost:8001` endpoint, and it serves two routes.
+
+The first `/signals` is used to return a list with the names of all active signals:
+
 ```sh
 curl -v http://localhost:8001/signals
 ```
@@ -96,7 +90,8 @@ curl -v http://localhost:8001/signals
 ]
 ```
 
-Ask for signal URL
+The second, `/live/<name>`, receives the signal's name as a query parameter, and returns all active sources (AKA _packagers_) for this signal:
+
 ```sh
 curl -v http://localhost:8001/live/live01
 ```
@@ -108,7 +103,18 @@ curl -v http://localhost:8001/live/live01
 }
 ```
 
-Open the Safari Browser or [VLC Player](https://www.videolan.org/vlc/) and plays the signal url `http://localhost:8080/live01/playlist.m3u8`
+## Watching the Live Stream
+
+To test the entire workflow and play the live stream using a playback client, execute all the services described previously in the following order:
+
+- Discovery Server
+  - Server 1
+  - Server 2
+    - Worker
+- Reporter Server
+- Origin Server
+
+Then, open the Safari Browser or [VLC Player](https://www.videolan.org/vlc/) and play the signal url `http://localhost:8080/live01/playlist.m3u8`
 
 ## Zero Downtime Strategy
 
