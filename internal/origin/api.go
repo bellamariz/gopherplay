@@ -2,54 +2,30 @@ package origin
 
 import (
 	"net/http"
-	"sync"
 
 	"github.com/bellamariz/go-live-without-downtime/internal/config"
-	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
 )
 
 type (
 	API struct {
-		Echo           *echo.Echo
-		Port           string
-		ReportEndPoint string
-		Cache          *sync.Map
-	}
-
-	ServerParams struct {
-		Config           *config.Config
+		Echo             *echo.Echo
+		Port             string
 		ReporterEndpoint string
-	}
-
-	CustomValidator struct {
-		validator *validator.Validate
 	}
 )
 
-func (cv *CustomValidator) Validate(i interface{}) error {
-	if err := cv.validator.Struct(i); err != nil {
-		return echo.NewHTTPError(http.StatusBadRequest, err.Error())
-	}
-
-	return nil
-}
-
-func NewServer(params ServerParams) *API {
-	server := echo.New()
-	server.Validator = &CustomValidator{validator: validator.New()}
-
+func NewServer(cfg *config.Config) *API {
 	return &API{
-		Echo:           echo.New(),
-		Port:           params.Config.OriginPort,
-		ReportEndPoint: params.ReporterEndpoint,
-		Cache:          &sync.Map{},
+		Echo:             echo.New(),
+		Port:             cfg.OriginPort,
+		ReporterEndpoint: cfg.LocalHost + ":" + cfg.ReporterPort,
 	}
 }
 
 func (api *API) ConfigureRoutes() {
 	api.Echo.GET("/healthcheck", api.healthcheck)
-	api.Echo.GET("/live/:name", api.getSignalServer)
+	api.Echo.GET("/live/:name", api.getSignal)
 	api.Echo.GET("/signals", api.getSignals)
 }
 
@@ -62,35 +38,26 @@ func (api *API) healthcheck(c echo.Context) error {
 }
 
 func (api *API) getSignals(c echo.Context) error {
-	signals, err := listSignals(api.ReportEndPoint)
+	signals, err := listSignals(api.ReporterEndpoint)
 	if err != nil {
 		errorMsg := map[string]string{
 			"error": err.Error(),
 		}
-		return c.JSON(http.StatusBadRequest, errorMsg)
+		return c.JSON(http.StatusInternalServerError, errorMsg)
 	}
 
 	return c.JSON(http.StatusOK, signals)
 }
 
-func (api *API) getSignalServer(c echo.Context) error {
+func (api *API) getSignal(c echo.Context) error {
 	name := c.Param("name")
 
-	signalInfo, err := getSignalPackagers(api.ReportEndPoint, name)
+	signalInfo, err := getSignalIngest(api.ReporterEndpoint, name)
 	if err != nil {
 		errorMsg := map[string]string{
 			"error": err.Error(),
 		}
-		return c.JSON(http.StatusBadRequest, errorMsg)
-	}
-
-	if len(signalInfo.Packagers) == 0 {
-		if err != nil {
-			errorMsg := map[string]string{
-				"error": "The signal does not have any active packager as ingest",
-			}
-			return c.JSON(http.StatusBadRequest, errorMsg)
-		}
+		return c.JSON(http.StatusInternalServerError, errorMsg)
 	}
 
 	activeSignalPath := formatPath(signalInfo.Packagers, signalInfo.Signal)

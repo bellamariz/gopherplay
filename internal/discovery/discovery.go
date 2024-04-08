@@ -1,9 +1,7 @@
 package discovery
 
 import (
-	"errors"
 	"fmt"
-	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,14 +13,16 @@ import (
 )
 
 type DiscoveryService struct {
-	path   string
-	period time.Duration
+	httpClient *client.HTTPClient
+	path       string
+	period     time.Duration
 }
 
 func NewService(cfg *config.Config) *DiscoveryService {
 	return &DiscoveryService{
-		path:   cfg.OutputStreamPath,
-		period: cfg.MaxAgePlaylist,
+		httpClient: client.New(),
+		path:       cfg.OutputStreamPath,
+		period:     cfg.MaxAgePlaylist,
 	}
 }
 
@@ -67,34 +67,12 @@ func (ds *DiscoveryService) FetchActivePackagers(cfg *config.Config) []string {
 	for _, port := range packagerPorts {
 		packagerEndpoint := cfg.LocalHost + ":" + port
 
-		if client.Healthcheck(packagerEndpoint) {
+		if ds.httpClient.Healthcheck(packagerEndpoint) {
 			activePackagers = append(activePackagers, packagerEndpoint)
 		}
 	}
 
 	return activePackagers
-}
-
-// ResetSignals resets the signals cache in the reporter server to prevent invalid values
-func (ds *DiscoveryService) ResetSignals(cfg *config.Config) error {
-	client := &http.Client{Timeout: 2 * time.Second}
-
-	endpoint := fmt.Sprintf("%s:%s/ingests", cfg.LocalHost, cfg.ReporterPort)
-	req, err := http.NewRequest(http.MethodDelete, endpoint, nil)
-	if err != nil {
-		return err
-	}
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return err
-	}
-
-	if resp.StatusCode != http.StatusOK {
-		log.Err(err).Msg("Error reset cache in reporter server")
-		return errors.New("error reset cache in reporter server")
-	}
-	return nil
 }
 
 func isRecentlyUpdated(fi os.FileInfo, period time.Duration) bool {
