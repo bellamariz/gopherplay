@@ -103,6 +103,20 @@ curl -v http://localhost:8001/live/live01
 }
 ```
 
+## Proxy to the active stream
+
+The proxy server redirects the request to the active streaming server. This proxy server is important to improve resilience and client experience if some of the streaming server turn down or got a problem.
+
+This server only works if all the before applications are running.
+
+```sh
+make run-local-discovery
+```
+
+```sh
+curl -v localhost:8002/live01/playlist.m3u8
+```
+
 ## Watching the Live Stream
 
 To test the entire workflow and play the live stream using a playback client, execute all the services described previously in the following order:
@@ -113,8 +127,9 @@ To test the entire workflow and play the live stream using a playback client, ex
     - Worker
 - Reporter Server
 - Origin Server
+- Proxy Server
 
-Then, open the Safari Browser or [VLC Player](https://www.videolan.org/vlc/) and play the signal url `http://localhost:8080/live01/playlist.m3u8`
+Then, open the Safari Browser or [VLC Player](https://www.videolan.org/vlc/) and play the signal url `http://localhost:8002/live01/playlist.m3u8`
 
 ## Zero Downtime Strategy
 
