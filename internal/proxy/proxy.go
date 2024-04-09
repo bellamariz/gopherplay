@@ -40,7 +40,6 @@ func (api *API) Start() error {
 }
 
 func (api *API) proxySignalVideo(c echo.Context) error {
-	fmt.Println("get signal method")
 	name := c.Param("name")
 	if name == "" {
 		errorMsg := map[string]string{
