@@ -37,6 +37,9 @@ run-local-reporter:
 run-local-origin:
 	go run main.go origin
 
+run-local-proxy:
+	go run main.go proxy
+
 lint:
 	golangci-lint run -v
 	@echo "DONE ✅"
