@@ -19,6 +19,9 @@ run-reporter:
 run-origin:
 	docker run -ti --rm --network host -v OutputVolume:/app go-live origin
 
+run-proxy:
+	docker run -ti --rm --network host -v OutputVolume:/app go-live proxy
+
 run-local-worker:
 	go run main.go worker
 
@@ -36,6 +39,9 @@ run-local-reporter:
 
 run-local-origin:
 	go run main.go origin
+
+run-local-proxy:
+	go run main.go proxy
 
 lint:
 	golangci-lint run -v
