@@ -62,8 +62,8 @@ Thus, we now have two other containers, which also run separately:
 To run these services, as was done in the previous section, we use the commands available in the Makefile (also running them in separate terminal tabs):
 
 ```sh
-make run-local-discovery
 make run-local-reporter
+make run-local-discovery
 ```
 
 ## Serving the Origin
@@ -90,7 +90,7 @@ curl -v http://localhost:8001/signals
 ]
 ```
 
-The second, `/live/<name>`, receives the signal's name as a query parameter, and returns all active sources (AKA _packagers_) for this signal:
+The second, `/live/<name>`, receives the signal's name as a query parameter, and returns an active ingest source (i.e. _packager_) for this signal:
 
 ```sh
 curl -v http://localhost:8001/live/live01
@@ -103,34 +103,32 @@ curl -v http://localhost:8001/live/live01
 }
 ```
 
-## Proxy to the active stream
+## Proxy to Active Stream
 
-The proxy server redirects the request to the active streaming server. This proxy server is important to improve resilience and client experience if some of the streaming server turn down or got a problem.
+The **proxy** service redirects the player request to the active streaming server. If an active stream fails (i.e. the active _packager_ suddenly becomes unavailable), the proxy will automatically redirect the stream to the next available _packager_. This switch works with little to no impact to the playback, avoiding video freezing, buffering or a need to reload the stream - and, thus, *providing the client watching the live stream with practically zero down time*.
 
-This server only works if all the before applications are running.
+> :warning: Of course, this server only runs correctly if all the services before are already running.
 
 ```sh
-make run-local-discovery
+make run-local-proxy
 ```
 
 ```sh
 curl -v localhost:8002/live01/playlist.m3u8
+
+
 ```
 
 ## Watching the Live Stream
 
 To test the entire workflow and play the live stream using a playback client, execute all the services described previously in the following order:
 
-- Discovery Server
-  - Server 1
-  - Server 2
-    - Worker
-- Reporter Server
-- Origin Server
-- Proxy Server
+- Worker
+- Server 1
+- Server 2
+- Reporter
+- Discovery
+- Origin
+- Proxy
 
-Then, open the Safari Browser or [VLC Player](https://www.videolan.org/vlc/) and play the signal url `http://localhost:8002/live01/playlist.m3u8`
-
-## Zero Downtime Strategy
-
-TBD
+Then, open the Safari Browser or [VLC Player](https://www.videolan.org/vlc/) and play the signal URL `http://localhost:8002/live01/playlist.m3u8`.
