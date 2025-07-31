@@ -1,12 +1,12 @@
 module github.com/bellamariz/go-live-without-downtime
 
-go 1.21.4
+go 1.24.2
 
 require (
 	github.com/joho/godotenv v1.5.1
 	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/labstack/echo/v4 v4.11.4
-	github.com/rs/zerolog v1.32.0
+	github.com/rs/zerolog v1.33.0
 	github.com/spf13/cobra v1.8.0
 )
 
