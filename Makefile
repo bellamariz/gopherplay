@@ -1,3 +1,10 @@
+lint:
+	golangci-lint run -v
+	@echo "DONE ✅"
+
+clean:
+	rm -r output/*
+
 build:
 	docker build -t go-live .
 
@@ -42,10 +49,3 @@ run-local-origin:
 
 run-local-proxy:
 	go run main.go proxy
-
-lint:
-	golangci-lint run -v
-	@echo "DONE ✅"
-
-clean:
-	rm -r output/*
