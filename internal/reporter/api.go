@@ -7,6 +7,7 @@ import (
 	"github.com/bellamariz/go-live-without-downtime/internal/config"
 	"github.com/bellamariz/go-live-without-downtime/internal/sources"
 	"github.com/labstack/echo/v4"
+	"github.com/rs/zerolog/log"
 )
 
 type (
@@ -44,16 +45,20 @@ func (api *API) getIngests(c echo.Context) error {
 	ingests := []sources.Ingest{}
 
 	api.Cache.Range(func(key, value any) bool {
-		ingest := value.(sources.Ingest)
+		ingest, ok := value.(sources.Ingest)
+		if !ok {
+			log.Error().Msg("failed to cast value to sources.Ingest")
+			return true
+		}
 
 		if ingest.IsActive() {
-			ingests = append(ingests, value.(sources.Ingest))
+			ingests = append(ingests, ingest)
 		}
 
 		return true
 	})
 
-	if len(ingests) <= 0 {
+	if len(ingests) == 0 {
 		errMsg := map[string]string{
 			"error": "No active ingest info available",
 		}

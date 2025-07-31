@@ -13,7 +13,10 @@ func RunProxy(cfg *config.Config) *cobra.Command {
 		Run: func(*cobra.Command, []string) {
 			proxyAPI := proxy.NewProxyServer(cfg)
 			proxyAPI.ConfigureRoutes()
-			proxyAPI.Start()
+			err := proxyAPI.Start()
+			if err != nil {
+				panic("failed to start proxy service: " + err.Error())
+			}
 		},
 	}
 }

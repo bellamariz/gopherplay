@@ -12,9 +12,11 @@ func RunReporter(cfg *config.Config) *cobra.Command {
 		Short: "Run reporter service to expose active ingests",
 		Run: func(*cobra.Command, []string) {
 			reporterAPI := reporter.NewServer(cfg)
-
 			reporterAPI.ConfigureRoutes()
-			reporterAPI.Start()
+			err := reporterAPI.Start()
+			if err != nil {
+				panic("failed to start reporter service: " + err.Error())
+			}
 		},
 	}
 }

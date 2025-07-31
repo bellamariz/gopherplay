@@ -63,7 +63,7 @@ func (c *HTTPClient) Post(endpoint, contentType string, payload []byte) error {
 }
 
 func (c *HTTPClient) Delete(endpoint string) error {
-	req, err := http.NewRequest(http.MethodDelete, endpoint, nil)
+	req, err := http.NewRequest(http.MethodDelete, endpoint, http.NoBody)
 	if err != nil {
 		return err
 	}
